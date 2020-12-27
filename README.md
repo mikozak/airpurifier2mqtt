@@ -1,6 +1,6 @@
 # airpurifier2mqtt
 
-Bridge between Xiaomi Airpurifier 3H and MQTT written in python asyncio.
+Bridge between Xiaomi Air Purifier 3H and MQTT written in python asyncio.
 
 ![Diagram](https://github.com/mikozak/airpurifier2mqtt/blob/main/doc/assets/diagram.png "Diagram")
 
