@@ -66,7 +66,7 @@ You can publish multiple command at once, for example:
     cd /opt
     mkdir airpurifier2mqtt
     cd airpurifier2mqtt
-    curl -o airpurifier2mqtt.py 'https://raw.githubusercontent.com/mikozak/airpurifier2mqtt/master/airpurifier2mqtt.py'
+    curl -o airpurifier2mqtt.py 'https://raw.githubusercontent.com/mikozak/airpurifier2mqtt/main/airpurifier2mqtt.py'
     ```
 
 2. Create python virtual environment 
@@ -76,13 +76,13 @@ You can publish multiple command at once, for example:
 
 3. Install dependencies
     ```
-    curl -o requirements.txt 'https://raw.githubusercontent.com/mikozak/airpurifier2mqtt/master/requirements.txt'
+    curl -o requirements.txt 'https://raw.githubusercontent.com/mikozak/airpurifier2mqtt/main/requirements.txt'
     env/bin/python -m pip install --upgrade pip -r requirements.txt
     ```
 
 3. Install configuration file (for example in */etc*)
     ```
-    sudo curl -o /etc/airpurifier2mqtt.yaml 'https://raw.githubusercontent.com/mikozak/airpurifier2mqtt/master/airpurifier2mqtt.yaml'
+    sudo curl -o /etc/airpurifier2mqtt.yaml 'https://raw.githubusercontent.com/mikozak/airpurifier2mqtt/main/airpurifier2mqtt.yaml'
     ```
 
 4. Edit configuration file installed in previous step.
@@ -101,7 +101,7 @@ You can publish multiple command at once, for example:
 
 2. Install service
     ```
-    sudo curl -o /etc/systemd/system/airpurifier2mqtt.service 'https://raw.githubusercontent.com/mikozak/deconz2mqtt/master/airpurifier2mqtt.service'
+    sudo curl -o /etc/systemd/system/airpurifier2mqtt.service 'https://raw.githubusercontent.com/mikozak/airpurifier2mqtt/main/airpurifier2mqtt.service'
     ```
 
 3. Verify and edit if needed in `/etc/systemd/system/airpurifier2mqtt.service`:
