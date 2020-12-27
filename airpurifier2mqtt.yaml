@@ -1,0 +1,40 @@
+logging:
+  root: WARN
+  airpurifier2mqtt: INFO
+  hbmqtt: WARN
+# List of devices
+# Currently works only with Xiaomi Airpurifier 3H
+devices:
+  # Name of a device. Needs to be unique. Used to
+  # form MQTT topic to publish device state and
+  # to subscribe for commands controlling a device
+  - name: my-air-purifier-3h
+    ip: hostname_or_ip
+    # device token
+    # See: https://python-miio.readthedocs.io/en/latest/discovery.html
+    token: my-token
+    polling:
+      # number of polling retries in case of failure
+      retries: 5
+      # interval between retries (seconds)
+      retry_interval: 4
+      # interval between polling (seconds)
+      interval: 120
+mqtt:
+  client:
+    # URI use to connect to MQTT broker.
+    uri: "mqtt://mqtt_user:password@mqtt_broker_hostname_or_ip"
+    cleansession: True
+    # https://hbmqtt.readthedocs.io/en/latest/references/mqttclient.html#mqttclient-configuration
+    keep_alive: 10
+    ping_delay: 1
+    default_qos: 0
+    default_retain: False
+    auto_reconnect: True
+    reconnect_max_interval: 60
+    reconnect_retries: 20
+  # MQTT topic prefix where state and commands are published
+  #
+  # Each device state is published as JSON to topic: <topic_prefix>/<device_name>/state.
+  # Following topic is subscribed for commands: <topic_prefix>/<device_name>/set
+  topic_prefix: airpurifier

@@ -1,0 +1,5 @@
+# visual studio code
+.vscode/settings.json
+# python venv
+env/
+pip-selfcheck.json
