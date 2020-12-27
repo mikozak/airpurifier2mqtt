@@ -1,14 +1,18 @@
 # airpurifier2mqtt
 
-Bridge between Xiaomi Airpurifier 3H and MQTT.
+Bridge between Xiaomi Airpurifier 3H and MQTT written using python asyncio.
 
-The script uses [python-miio library](https://github.com/rytilahti/python-miio) to communicate with air purifier. In order to get the communication working you need to get your device token. Refer to [python-miio Getting started](https://python-miio.readthedocs.io/en/latest/discovery.html) section to find out how to obtain it.
+The script uses [python-miio](https://github.com/rytilahti/python-miio) to communicate with air purifier. In order to
+get the communication working you need to get your device token. Refer to [Getting
+started](https://python-miio.readthedocs.io/en/latest/discovery.html) section of *python-miio* to find out how to obtain
+it.
 
 ## Features
 
 ### Getting air purifier state
 
-The scripts polls multiple air purifiers state and publishes it to MQTT broker as a JSON. Example payload published for air purifier defined in configuration file as `my-purifier` to MQTT topic `airpurifier/my-airpurifier/state`:
+The script polls multiple air purifiers states and publishes them to MQTT broker as a JSON. Example JSON payload published for
+air purifier defined in configuration file as `my-airpurifier` to MQTT topic `airpurifier/my-airpurifier/state`:
 
 ```json
 {
@@ -37,18 +41,25 @@ The scripts polls multiple air purifiers state and publishes it to MQTT broker a
 
 ### Controlling air purifier
 
-Air purifier can be controlled by publishing JSON formatted commands to MQTT topic.
-For example if you want to power on your device defined in configuration file as `my-airpurifier` then you need publish following JSON message to topic `airpurifier/my-airpurifier/set`
+Air purifier can be controlled by publishing JSON formatted commands to MQTT topic. For example, if you want to power on
+your device defined in configuration file as `my-airpurifier`, then you need to publish following JSON message to topic
+`airpurifier/my-airpurifier/set`:
 
 ```json
 {"power": "on"}
 ```
 
-You can publish multiple command at once, for example:
+You can publish multiple commands at once, for example:
 
 ```json
 {"power": "off", "mode": "Favorite", "favirote_level": 10}
 ```
+
+#### Supported commands
+
+* *power*
+* *mode*
+* *favorite_level*
 
 ## Installation
 
@@ -62,7 +73,8 @@ You can publish multiple command at once, for example:
 ### Installation steps
 
 1. Create directory (for example */opt/airpurifier2mqtt*) and put inside *airpurifier2mqtt.py*
-    ```
+
+    ```bash
     cd /opt
     mkdir airpurifier2mqtt
     cd airpurifier2mqtt
@@ -70,37 +82,44 @@ You can publish multiple command at once, for example:
     ```
 
 2. Create python virtual environment 
-    ```
+
+    ```bash
     python3 -m venv env
     ```
 
 3. Install dependencies
-    ```
+
+    ```bash
     curl -o requirements.txt 'https://raw.githubusercontent.com/mikozak/airpurifier2mqtt/main/requirements.txt'
     env/bin/python -m pip install --upgrade pip -r requirements.txt
     ```
 
-3. Install configuration file (for example in */etc*)
-    ```
+4. Install configuration file (for example in */etc*)
+
+    ```bash
     sudo curl -o /etc/airpurifier2mqtt.yaml 'https://raw.githubusercontent.com/mikozak/airpurifier2mqtt/main/airpurifier2mqtt.yaml'
     ```
 
-4. Edit configuration file installed in previous step.
+5. Edit configuration file installed in previous step.
 
-5. Run it
-    ```
+6. Run it
+
+    ```bash
     env/bin/python airpurifier2mqtt.py --config /etc/airpurifier2mqtt.yaml
     ```
 
 ### Installation as a service
 
-1. Create system user which will be used to run service process (for the purpose of this instruction user named *airpurifier2mqtt* will be used)
-    ```
+1. Create system user which will be used to run service process (for the purpose of this instruction user named
+   *airpurifier2mqtt* will be used)
+
+    ```bash
     sudo useradd -r airpurifier2mqtt
     ```
 
 2. Install service
-    ```
+
+    ```bash
     sudo curl -o /etc/systemd/system/airpurifier2mqtt.service 'https://raw.githubusercontent.com/mikozak/airpurifier2mqtt/main/airpurifier2mqtt.service'
     ```
 
@@ -109,11 +128,13 @@ You can publish multiple command at once, for example:
     * `User` is correct (equals username created in step 1)
 
 4. Start service
-    ```
+
+    ```bash
     sudo systemctl start airpurifier2mqtt
     ```
 
     If you want to start the service automatically after system restart you need to enable it
-    ```
+
+    ```bash
     sudo systemctl enable airpurifier2mqtt
     ```
