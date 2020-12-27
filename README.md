@@ -1,6 +1,8 @@
 # airpurifier2mqtt
 
-Bridge between Xiaomi Airpurifier 3H and MQTT written using python asyncio.
+Bridge between Xiaomi Airpurifier 3H and MQTT written in python asyncio.
+
+![Diagram](https://github.com/mikozak/airpurifier2mqtt/blob/main/doc/assets/diagram.png "Diagram")
 
 The script uses [python-miio](https://github.com/rytilahti/python-miio) to communicate with air purifier. In order to
 get the communication working you need to get your device token. Refer to [Getting
