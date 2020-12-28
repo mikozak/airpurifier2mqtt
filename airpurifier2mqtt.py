@@ -159,6 +159,9 @@ async def mqtt_subscriber(mqtt: DotMap, device_command_queues: dict):
         message = await mqtt_client.deliver_message()
         log.debug('Got message topic=%s payload=%s', message.topic, message.data.decode('utf-8'))
         device_name = message.topic[len(mqtt.topic_prefix):].lstrip('/').partition('/')[0]
+        if not device_name in device_command_queues:
+            log.error('Unknown device "%s"', device_name)
+            continue
         payload = message.data.decode('utf-8')
         try:
             payload_json = json.loads(payload)
