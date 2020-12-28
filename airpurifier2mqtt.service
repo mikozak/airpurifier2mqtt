@@ -1,0 +1,12 @@
+[Unit]
+Description=airpurifier2mqtt
+Requires=network.target
+
+[Service]
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=/opt/airpurifier2mqtt
+ExecStart=/opt/airpurifier2mqtt/env/bin/python /opt/airpurifier2mqtt/airpurifier2mqtt.py --config /etc/airpurifier2mqtt.yaml
+User=airpurifier2mqtt
+
+[Install]
+WantedBy=multi-user.target
