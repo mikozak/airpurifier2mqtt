@@ -59,9 +59,9 @@ You can publish multiple commands at once, for example:
 
 #### Supported commands
 
-* *power*
-* *mode*
-* *favorite_level*
+* *power*. Possible values: `"on"`, `"off"`
+* *mode*. Possible values: `"Auto"`, `"Silent"`, `"Favorite"`, `"Fan"`
+* *favorite_level*. Fan speed in "Favorite" mode. Possible value is integer from `0` to `14`
 
 ## Installation
 
