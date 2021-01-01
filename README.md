@@ -19,7 +19,7 @@ air purifier defined in configuration file as `my-airpurifier` to MQTT topic `ai
 ```json
 {
   "temperature": 20.9,
-  "power": "on",
+  "power": "On",
   "aqi": 8,
   "average_aqi": 23,
   "humidity": 50,
@@ -43,23 +43,26 @@ air purifier defined in configuration file as `my-airpurifier` to MQTT topic `ai
 
 ### Controlling air purifier
 
-Air purifier can be controlled by publishing JSON formatted commands to MQTT topic. For example, if you want to power on
+Air purifier can be controlled by publishing JSON formatted commands to MQTT. For example, if you want to power on
 your device defined in configuration file as `my-airpurifier`, then you need to publish following JSON message to topic
 `airpurifier/my-airpurifier/set`:
 
 ```json
-{"power": "on"}
+{"power": "On"}
 ```
 
 You can publish multiple commands at once, for example:
 
 ```json
-{"power": "off", "mode": "Favorite", "favirote_level": 10}
+{"power": "Off", "mode": "Favorite", "favirote_level": 10}
 ```
+
+There is also an alternative way. You can include command name in MQTT topic like this 
+`airpurifier/my-airpurifier/set/power` with payload `On` to power on air purifier.
 
 #### Supported commands
 
-* *power*. Possible values: `"on"`, `"off"`
+* *power*. Possible values: `"On"`, `"Off"`
 * *mode*. Possible values: `"Auto"`, `"Silent"`, `"Favorite"`, `"Fan"`
 * *favorite_level*. Fan speed in "Favorite" mode. Possible value is integer from `0` to `14`
 
