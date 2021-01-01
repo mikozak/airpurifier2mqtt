@@ -38,7 +38,7 @@ class AirPurifierMiotEncoder(json.JSONEncoder):
         if isinstance(o, AirPurifierMiotStatus):
             return {
                 'temperature': o.temperature,
-                'power': o.power,
+                'power': o.power.capitalize(),
                 'aqi': o.aqi,
                 'average_aqi': o.average_aqi,
                 'humidity': o.humidity,
@@ -154,17 +154,25 @@ async def mqtt_publisher(mqtt: DotMap, device_status_queue: asyncio.Queue):
 async def mqtt_subscriber(mqtt: DotMap, device_command_queues: dict):
     log = logging.getLogger('airpurifier2mqtt.mqtt.subscriber')
     mqtt_client = await _create_mqtt_client(mqtt, log=log)
-    await mqtt_client.subscribe([('{}/+/set'.format(mqtt.topic_prefix), QOS_0)])
+    await mqtt_client.subscribe([
+        ('{}/+/set'.format(mqtt.topic_prefix), QOS_0),
+        ('{}/+/set/+'.format(mqtt.topic_prefix), QOS_0)])
     while True:
         message = await mqtt_client.deliver_message()
         log.debug('Got message topic=%s payload=%s', message.topic, message.data.decode('utf-8'))
-        device_name = message.topic[len(mqtt.topic_prefix):].lstrip('/').partition('/')[0]
+        topic_parts = message.topic.split('/')[1:]
+        device_name = topic_parts.pop(0)
+        topic_parts.pop(0) # pop 'set'
+        device_property = topic_parts.pop(0) if len(topic_parts) == 1 else None 
         if not device_name in device_command_queues:
             log.error('Unknown device "%s"', device_name)
             continue
         payload = message.data.decode('utf-8')
         try:
-            payload_json = json.loads(payload)
+            if device_property is None:
+                payload_json = json.loads(payload)
+            else:
+                payload_json = { device_property: payload } 
             device_command_queues[device_name].put_nowait(payload_json)
             log.debug('Scheduled command for device "%s"', device_name)
         except asyncio.QueueFull:
@@ -190,16 +198,32 @@ async def device_command(device_config: DotMap, device_command_queue: asyncio.Qu
         command = functools.partial(_retry(_device_command, fail_result=False, log=log), log, device)
         log.debug('Processing command for device "%s": %s', device_config.name, command_json)
         for property_name, property_value in command_json.items():
-            if property_name == 'power' and property_value in ('on', 'off'):
-                await command(property_value)
-            elif property_name == 'mode' and property_value in ('Auto', 'Silent', 'Favorite', 'Fan'):
-                await command('set_mode', miio.airpurifier_miot.OperationMode[property_value])
-            elif property_name == 'favorite_level' and isinstance(property_value, int) and property_value >= 0 and property_value <= 14:
-                await command('set_favorite_level', property_value)
-            else:
-                log.error('Unknown command "%s" or invalid command value or value type "%s"',
-                    property_name,
-                    property_value)
+            try:
+                if property_name == 'power':
+                    val = property_value.lower()
+                    if not val in ('on', 'off'):
+                        raise ValueError('Value must be "on" or "off" but was {}'.format(val))
+                    await command(val)
+                elif property_name == 'mode':
+                    val = property_value.capitalize()
+                    if not val in ('Auto', 'Silent', 'Favorite', 'Fan'):
+                        raise ValueError('Value must be "Auto", "Silent", "Favorite" or "Fan"  but was {}'.format(val))
+                    await command('set_mode', miio.airpurifier_miot.OperationMode[val])
+                elif property_name == 'favorite_level': 
+                    val = int(property_value)
+                    if  not 0 <= val <= 14:
+                        raise ValueError('Value must be between 0 and 14 but was {}'.format(val))
+                    await command('set_favorite_level', val)
+                else:
+                    log.error('Unknown command "%s" or invalid command value or value type "%s"',
+                        property_name,
+                        property_value)
+            except Exception as error: 
+                log.error('Cannot process command "%s". Reason: %s', property_name, error)
+                continue
+        # sleep some time before polling state to get a device
+        # time to update it's state
+        await asyncio.sleep(0.5)
         force_poll_event.set()
 
 async def device_polling(device_config: DotMap, device_status_queue: asyncio.Queue, force_poll_event: asyncio.Event):
@@ -255,7 +279,7 @@ async def start(config: DotMap):
         try:
             task.result()
         except Exception as error:
-            log.error('Finishing because of error: %s', error)
+            log.exception('Finishing because of error: %s', error)
     for task in pending:
         task.cancel()
 
