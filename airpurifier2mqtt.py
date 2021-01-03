@@ -18,20 +18,6 @@ class ConfigurationException(Exception):
     """Configuration error"""
     pass
 
-class DeviceStatus:
-    """Air purifier status"""
-    def __init__(self, name: str, status: AirPurifierMiotStatus):
-        self._name = name
-        self._status = status
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def status(self):
-        return self._status
-
 class AirPurifierMiotEncoder(json.JSONEncoder):
 
     def default(self, o):
@@ -72,8 +58,9 @@ def _device_status(airpurifier: miio.AirPurifierMiot, log: logging.Logger):
         try:
             polling_start = timer()
             status = airpurifier.status()
+            status_json = json.dumps(status, cls=AirPurifierMiotEncoder).encode('utf-8')
             log.debug('Polling state succeeded and took %.3fs', timer() - polling_start)
-            return status
+            return status_json
         except Exception as error:
             log.warning('Polling state failed and took %.3fs. Reason is %s: %s',
                 timer() - polling_start,
@@ -145,11 +132,10 @@ async def mqtt_publisher(mqtt: DotMap, device_status_queue: asyncio.Queue):
     log = logging.getLogger('airpurifier2mqtt.mqtt.publisher')
     mqtt_client = await _create_mqtt_client(mqtt, log=log)
     while True:
-        device_status = await device_status_queue.get()
-        mqtt_topic = '{}/{}/state'.format(mqtt.topic_prefix, device_status.name)
-        mqtt_payload = json.dumps(device_status.status, cls=AirPurifierMiotEncoder).encode('utf-8')
-        log.debug('Publishing: topic=%s payload=%s', mqtt_topic, mqtt_payload)
-        await mqtt_client.publish(mqtt_topic, mqtt_payload)
+        device_name, device_status = await device_status_queue.get()
+        mqtt_topic = '{}/{}/state'.format(mqtt.topic_prefix, device_name)
+        log.debug('Publishing: topic=%s payload=%s', mqtt_topic, device_status)
+        await mqtt_client.publish(mqtt_topic, device_status)
 
 async def mqtt_subscriber(mqtt: DotMap, device_command_queues: dict):
     log = logging.getLogger('airpurifier2mqtt.mqtt.subscriber')
@@ -221,9 +207,6 @@ async def device_command(device_config: DotMap, device_command_queue: asyncio.Qu
             except Exception as error: 
                 log.error('Cannot process command "%s". Reason: %s', property_name, error)
                 continue
-        # sleep some time before polling state to get a device
-        # time to update it's state
-        await asyncio.sleep(0.5)
         force_poll_event.set()
 
 async def device_polling(device_config: DotMap, device_status_queue: asyncio.Queue, force_poll_event: asyncio.Event):
@@ -232,6 +215,9 @@ async def device_polling(device_config: DotMap, device_status_queue: asyncio.Que
     while True:
         if force_poll_event.is_set():
             log.debug('Polling device state has been forced')
+            # sleep some time before polling state to get a device
+            # time to update it's state
+            await asyncio.sleep(1)
         retryable_device_status = _retry(
             _device_status, 
             retries = device_config.polling.get('retries', 0), 
@@ -239,10 +225,9 @@ async def device_polling(device_config: DotMap, device_status_queue: asyncio.Que
             log = log)
         status = await retryable_device_status(device, log)
         if status:
-            device_status = DeviceStatus(device_config.name, status)
             if device_status_queue.full():
                 log.warning('Status queue is full. Polling will be suspended')
-            await device_status_queue.put(device_status)
+            await device_status_queue.put((device_config.name, status))
             log.debug('Device status enqueued')
         polling_interval = device_config.polling.get('interval', 120)
         log.debug('Next polling in %ds', polling_interval)
