@@ -63,7 +63,11 @@ There is also an alternative way. You can include command name in MQTT topic lik
 #### Supported commands
 
 * *power*. Possible values: `"On"`, `"Off"`
-* *mode*. Possible values: `"Auto"`, `"Silent"`, `"Favorite"`, `"Fan"`
+* *mode*. Possible values: 
+  * `"Auto"` - corresponds to "Auto" mode in *Xiaomi Home* app 
+  * `"Silent"` - corresponds to "Night" mode in *Xiaomi Home* app
+  * `"Favorite"` - corresponds to "Manual" mode in *Xiaomi Home* app
+  * `"Fan"` - corresponds to "Level" mode in *Xiaomi Home* app
 * *favorite_level*. Fan speed in "Favorite" mode. Possible value is integer from `0` to `14`
 
 ## Installation
