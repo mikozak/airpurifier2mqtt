@@ -72,8 +72,6 @@ There is also an alternative way. You can include command name in MQTT topic lik
 
 ## Home Assistant integration
 
-I use Home Assistant to control my air purifier.
-
 ### Lovelace card
 
 <img src="https://github.com/mikozak/airpurifier2mqtt/blob/main/doc/assets/lovelace%20card.png" width="490"/>
@@ -105,6 +103,80 @@ entities:
         attribute: average_aqi
         name: average
         unit: μg/m³
+```
+
+### Configuration
+
+```yaml
+fan:
+  - platform: mqtt
+    name: air_purifier_xiaomi_3h_1
+    unique_id: air_purifier_xiaomi_3h_1
+    command_topic: 'airpurifier/airpurifier-3h-1/set/power'
+    json_attributes_topic: 'airpurifier/airpurifier-3h-1/state'
+    state_topic: 'airpurifier/airpurifier-3h-1/state'
+    state_value_template: '{{ value_json.power }}'
+    payload_on: 'On'
+    payload_off: 'Off'
+    optimistic: true
+
+sensor:
+  - platform: template
+    sensors:
+      air_purifier_xiaomi_3h_1_aqi:
+        value_template: "{{ state_attr('fan.air_purifier_xiaomi_3h_1', 'aqi') }}"
+
+automation:
+  - id: 'air_purifier_xiaomi_3h_1_off'
+    alias: 'Air purifier: Off'
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.air_purifier_xiaomi_3h_1_aqi
+        below: 15
+        for:
+          minutes: 3
+    condition: "{{ states('fan.air_purifier_xiaomi_3h_1') == 'on' }}"
+    action:
+      - service: fan.turn_off
+        entity_id: fan.air_purifier_xiaomi_3h_1
+  - id: 'air_purifier_xiaomi_3h_1_on'
+    alias: 'Air purifier: On'
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.air_purifier_xiaomi_3h_1_aqi
+        above: 18
+        for:
+          minutes: 3
+    condition: "{{ states('fan.air_purifier_xiaomi_3h_1') == 'off' }}"
+    action:
+      - service: mqtt.publish
+        data:
+          topic: airpurifier/airpurifier-3h-1/set
+          payload: '{"mode": "Favorite", "favorite_level": 1}'
+  - id: 'air_purifier_xiaomi_3h_1_speed'
+    alias: 'Air purifier: Select speed'
+    trigger:
+      - platform: time_pattern
+        minutes: '/5'
+    condition: "{{ states('fan.air_purifier_xiaomi_3h_1') == 'on' }}"
+    action:
+      - service: mqtt.publish
+        data:
+          topic: airpurifier/airpurifier-3h-1/set/favorite_level
+          payload_template: >
+              {% if states('sensor.air_purifier_xiaomi_3h_1_aqi') | int > 30 %}
+                10
+              {% elif states('sensor.air_purifier_xiaomi_3h_1_aqi') | int > 25 %}
+                7
+              {% elif states('sensor.air_purifier_xiaomi_3h_1_aqi') | int > 20 %}
+                6
+              {% elif states('sensor.air_purifier_xiaomi_3h_1_aqi') | int > 15 %}
+                3
+              {% elif states('sensor.air_purifier_xiaomi_3h_1_aqi') | int > 10 %}
+                2
+              {% else %}
+                0
+              {% endif %}
 ```
 
 ## Installation
