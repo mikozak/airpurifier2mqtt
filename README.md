@@ -70,6 +70,43 @@ There is also an alternative way. You can include command name in MQTT topic lik
   * `"Fan"` - corresponds to "Level" mode in *Xiaomi Home* app
 * *favorite_level*. Fan speed in "Favorite" mode. Possible value is integer from `0` to `14`
 
+## Home Assistant integration
+
+I use Home Assistant to control my air purifier.
+
+### Lovelace card
+
+<img src="https://github.com/mikozak/airpurifier2mqtt/blob/main/doc/assets/lovelace%20card.png" width="490"/>
+
+This example uses [multiple-entity-row](https://github.com/benct/lovelace-multiple-entity-row).
+
+```yaml
+type: entities
+title: Air purifier
+show_header_toggle: false
+entities:
+  - entity: fan.air_purifier_xiaomi_3h_1
+    type: 'custom:multiple-entity-row'
+    toggle: true
+    state_color: true
+    name: Fan
+    secondary_info:
+      attribute: favorite_level
+      name: 'Speed (0-14):'
+  - entity: sensor.air_purifier_xiaomi_3h_1_aqi
+    type: 'custom:multiple-entity-row'
+    name: PM 2.5
+    state_header: current
+    secondary_info: last-updated
+    unit: μg/m³
+    icon: 'mdi:dots-hexagon'
+    entities:
+      - entity: fan.air_purifier_xiaomi_3h_1
+        attribute: average_aqi
+        name: average
+        unit: μg/m³
+```
+
 ## Installation
 
 ### You will need
