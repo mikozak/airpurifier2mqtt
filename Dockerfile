@@ -10,7 +10,7 @@ RUN curl -o airpurifier2mqtt.py 'https://raw.githubusercontent.com/kneip68/airpu
 
 RUN curl -o requirements.txt 'https://raw.githubusercontent.com/kneip68/airpurifier2mqtt/main/requirements.txt'
 
-RUN curl -o /data/airpurifier2mqtt.yaml.example 'https://raw.githubusercontent.com/mikozak/airpurifier2mqtt/main/airpurifier2mqtt.yaml'
+VOLUME /data
 
 RUN pip install --upgrade pip -r requirements.txt
 
