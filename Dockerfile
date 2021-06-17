@@ -14,4 +14,4 @@ RUN curl -o /data/airpurifier2mqtt.yaml.example 'https://raw.githubusercontent.c
 
 RUN pip install --upgrade pip -r requirements.txt
 
-CMD [ "env/bin/python", "airpurifier2mqtt.py", "--config", "/data/airpurifier2mqtt.yaml" ]
+CMD [ "airpurifier2mqtt.py", "--config", "/data/airpurifier2mqtt.yaml" ]
