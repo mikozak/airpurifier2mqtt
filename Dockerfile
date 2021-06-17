@@ -14,4 +14,4 @@ VOLUME /data
 
 RUN pip install --upgrade pip -r requirements.txt
 
-CMD [ "airpurifier2mqtt.py", "--config", "/data/airpurifier2mqtt.yaml" ]
+CMD ["python", "airpurifier2mqtt.py", "--config", "/data/airpurifier2mqtt.yaml" ]
