@@ -1,4 +1,4 @@
-FROM python:3-alpine3.12
+FROM python:3.8-alpine3.12
 
 RUN apk add --update alpine-sdk glib-dev rust curl cargo openssl-dev libffi-dev
 
