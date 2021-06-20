@@ -256,3 +256,39 @@ automation:
     ```bash
     sudo systemctl enable airpurifier2mqtt
     ```
+
+## Installation on Docker
+
+### You will need
+* a Running docker environment, tested on Raspberry OS
+* git installed on the host docker is running
+* a running mqtt broker reachable from docker
+
+### Build docker image
+1. Clone the git repository to a directory of your choice
+2. Build the image
+```bash
+cd airpurifier2mqtt
+docker build -t airpurifier2mqtt .
+```
+3. Create a directory to hold your configuration data
+For example:
+```bash
+mkdir /docker/volumes/airpurifier2mqtt/data
+```
+4. Create and modify the configuration yaml (Only when running the container for the first time) 
+In the directory created above, install the provided example configuration
+```bash
+cp ./airpurifier2mqtt.yaml /docker/volumes/airpurifier2mqtt/data/airpurifier2mqtt.yaml
+```
+Update at the IP address and token of the Air Purifier as well as the URL of the MQTT Server
+6. Start the container
+Replace <path_to_config_dir> by the absolute path of the directory in 3
+```bash
+docker run --network host --name airpurifier2mqtt -v <path_to_config_dir>:/data airpurifier2mqtt
+```
+So it looks like this if you follow my example above
+```bash
+docker run --network host --name airpurifier2mqtt -v /docker/volumes/airpurifier2mqtt/data:/data airpurifier2mqtt
+```
+
