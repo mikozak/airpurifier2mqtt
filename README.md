@@ -277,12 +277,15 @@ For example:
 mkdir /docker/volumes/airpurifier2mqtt/data
 ```
 4. Create and modify the configuration yaml (Only when running the container for the first time) 
+
 In the directory created above, install the provided example configuration
 ```bash
 cp ./airpurifier2mqtt.yaml /docker/volumes/airpurifier2mqtt/data/airpurifier2mqtt.yaml
 ```
 Update at the IP address and token of the Air Purifier as well as the URL of the MQTT Server
-6. Start the container
+
+5. Start the container
+
 Replace <path_to_config_dir> by the absolute path of the directory in 3
 ```bash
 docker run --network host --name airpurifier2mqtt -v <path_to_config_dir>:/data airpurifier2mqtt
